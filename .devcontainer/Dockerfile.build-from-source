@@ -1,0 +1,98 @@
+FROM debian:12.2
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Perform an update.
+RUN apt-get update && \
+	apt-get upgrade -y && \
+	apt-get clean all
+
+# Install common utilities and tools.
+RUN apt-get update && \
+	apt-get install -y --no-install-recommends --no-install-suggests \
+	bash curl wget tar zip bzip2 xz-utils \
+	unzip make ca-certificates gnupg \
+	git git-core openssh-client vim && \
+	apt-get clean all
+
+# Install Development tools.
+RUN apt-get update && \
+	apt-get install -y --no-install-recommends --no-install-suggests \
+	build-essential pkg-config zlib1g-dev libncurses5-dev \
+	libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev \
+	python3-gevent libnss3 libnspr4 libglib2.0-0 && \
+	apt-get clean all
+
+# Download Python.
+ENV PYTHON_VERSION="3.12"
+ENV PYTHON_PATCH_VERSION="0"
+RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}.${PYTHON_PATCH_VERSION}/Python-${PYTHON_VERSION}.${PYTHON_PATCH_VERSION}.tar.xz && \
+	tar -xf Python-${PYTHON_VERSION}.${PYTHON_PATCH_VERSION}.tar.xz -C /usr/local/ && \
+	rm -f Python-${PYTHON_VERSION}.${PYTHON_PATCH_VERSION}.tar.xz
+
+# Install Python.
+RUN cd /usr/local/Python-${PYTHON_VERSION}.${PYTHON_PATCH_VERSION} && \
+	./configure --enable-optimizations --prefix=/usr/local/python --exec-prefix=/usr/local/python && \
+	make && make altinstall && \
+	mkdir -p /etc/profile.d/ && \
+	echo "export PATH=/usr/local/python/bin:${PATH}" | tee /etc/profile.d/python-env.sh && \
+	cd / && rm -rf /usr/local/Python-${PYTHON_VERSION}.${PYTHON_PATCH_VERSION}
+
+# Create some soft links.
+RUN cd /usr/local/python/bin && \
+	ln -sf python${PYTHON_VERSION} python && \
+	ln -sf pip${PYTHON_VERSION} pip && \
+	ln -sf pydoc${PYTHON_VERSION} pydoc && \
+	ln -sf python${PYTHON_VERSION}-config python-config
+
+# Update PATH.
+ENV PATH=/usr/local/python/bin:${PATH}
+
+# Create default user.
+ENV USER_ID=1000
+ENV USER_NAME=devuser
+RUN addgroup --gid ${USER_ID} ${USER_NAME} && \
+	adduser --disabled-password --gecos "" \
+	    --uid ${USER_ID} --gid ${USER_ID} ${USER_NAME}
+
+# Set default user.
+ENV HOME /home/devuser
+USER devuser
+
+# Install some libraries.
+RUN pip install --break-system-packages \
+	pipreqs pytest setuptools pyaml
+
+# Install testify.
+RUN pip install --break-system-packages testify
+
+# Install behave.
+RUN pip install --break-system-packages behave
+
+# Install nose2.
+RUN pip install --break-system-packages nose2
+
+# Install selenium.
+RUN pip install --break-system-packages selenium
+
+# Install poetry.
+RUN pip install --break-system-packages poetry
+
+# Install robotframwork.
+RUN pip install --break-system-packages \
+	robotframework robotframework-datadriver \
+	robotframework-excellib robotframework-pythonlibcore \
+	robotframework-seleniumlibrary
+
+# Install browser support.
+RUN pip install --break-system-packages \
+	webdriver-manager
+
+# Install chromedriver support.
+RUN pip install --break-system-packages \
+	chromedriver-binary
+
+# Print Version.
+RUN python --version
+
+CMD /bin/bash

@@ -1,0 +1,32 @@
+{
+	"name": "learning-project-python",
+	"dockerComposeFile": "devcontainer-docker-compose.yml",
+	"service": "project-workspace",
+	"workspaceFolder": "/workspace",
+
+	"customizations": {
+		"vscode": {
+			"settings": {},
+			"extensions": [
+				"ms-python.python",
+				"d-biehl.robotcode",
+				"streetsidesoftware.code-spell-checker"
+			]
+		}
+	},
+
+	"forwardPorts": [3000],
+	"portsAttributes": {
+		"3000": {
+			"label": "Default Python web-service application port number",
+			"onAutoForward": "notify"
+		}
+	},
+
+	"shutdownAction": "stopCompose",
+	"postCreateCommand": "bash .devcontainer/post-create-command.sh",
+
+	"updateRemoteUserUID": true,
+	"containerUser": "devuser",
+	"remoteUser": "devuser",
+}
