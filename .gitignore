@@ -32,6 +32,9 @@
 !.devcontainer/devcontainer-docker-compose.json
 !.devcontainer/devcontainer-docker-compose.yml
 !.devcontainer/README.devcontainer.md
+!tests-examples/
+!tests-examples/000-robotframework-test.robot
+!tests-examples/README.000-robotframework-test.md
 
 # README.
 !README.md
